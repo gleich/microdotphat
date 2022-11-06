@@ -21,6 +21,15 @@ where
             .write(self.address, &[addresses::CMD_BRIGHTNESS, self.brightness])?;
         Ok(())
     }
+
+    pub fn set_brightness(&mut self, mut brightness: u8) -> Result<(), Error<I2cError>> {
+        if brightness > 127 {
+            brightness = 127;
+        }
+        self.i2c
+            .write(self.address, &[addresses::CMD_BRIGHTNESS, brightness])?;
+        Ok(())
+    }
 }
 
 pub mod addresses {
