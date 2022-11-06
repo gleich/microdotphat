@@ -30,6 +30,30 @@ where
             .write(self.address, &[addresses::CMD_BRIGHTNESS, brightness])?;
         Ok(())
     }
+
+    pub fn set_pixel(&mut self, matrix: Matrix, x: u8, y: u8, c: u8) {
+        match matrix {
+            Matrix1 => {
+                if c == 1 {
+                    self.matrix_1[y as usize] |= (0b1 << x);
+                } else {
+                    self.matrix_1[y as usize] &= !(0b1 << x);
+                }
+            }
+            Matrix2 => {
+                if c == 1 {
+                    self.matrix_2[x as usize] |= (0b1 << y);
+                } else {
+                    self.matrix_2[x as usize] |= !(0b1 << y);
+                }
+            }
+        }
+    }
+}
+
+enum Matrix {
+    Matrix1,
+    Matrix2,
 }
 
 pub mod addresses {
