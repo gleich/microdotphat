@@ -1,3 +1,5 @@
+use core::slice::SlicePattern;
+
 use embedded_hal::blocking::i2c::Write;
 
 pub struct NanoMatrix<I2C> {
@@ -48,6 +50,18 @@ where
                 }
             }
         }
+    }
+
+    pub fn update(&mut self) -> Result<(), Error<I2cError>> {
+        for x in 0..9 {
+            let mut buffer = &[addresses::CMD_MATRIX_1].to_vec();
+            buffer.extend(self.matrix_1.to_vec());
+            self.i2c.write(self.address, &buffer)?;
+            buffer = &[addresses::CMD_MATRIX_2].to_vec();
+            buffer.extend(self.matrix_2.to_vec());
+            self.i2c.write(self.address, &buffer)?;
+        }
+        Ok(())
     }
 }
 
