@@ -1,5 +1,3 @@
-use core::slice::SlicePattern;
-
 use embedded_hal::blocking::i2c::Write;
 
 pub struct NanoMatrix<I2C> {
@@ -33,18 +31,18 @@ where
         Ok(())
     }
 
-    pub fn set_pixel(&mut self, matrix: Matrix, x: u8, y: u8, c: u8) {
+    pub fn set_pixel(&mut self, matrix: Matrix, x: u8, y: u8, on: bool) {
         match matrix {
-            Matrix1 => {
-                if c == 1 {
-                    self.matrix_1[y as usize] |= (0b1 << x);
+            Matrix::One => {
+                if on {
+                    self.matrix_1[y as usize] |= 0b1 << x;
                 } else {
                     self.matrix_1[y as usize] &= !(0b1 << x);
                 }
             }
-            Matrix2 => {
-                if c == 1 {
-                    self.matrix_2[x as usize] |= (0b1 << y);
+            Matrix::Two => {
+                if on {
+                    self.matrix_2[x as usize] |= 0b1 << y;
                 } else {
                     self.matrix_2[x as usize] |= !(0b1 << y);
                 }
@@ -53,21 +51,32 @@ where
     }
 
     pub fn update(&mut self) -> Result<(), Error<I2cError>> {
-        for x in 0..9 {
-            let mut buffer = &[addresses::CMD_MATRIX_1].to_vec();
-            buffer.extend(self.matrix_1.to_vec());
-            self.i2c.write(self.address, &buffer)?;
-            buffer = &[addresses::CMD_MATRIX_2].to_vec();
-            buffer.extend(self.matrix_2.to_vec());
-            self.i2c.write(self.address, &buffer)?;
-        }
+        let mut buffer = [addresses::CMD_MATRIX_1].to_vec();
+        buffer.extend_from_slice(&self.matrix_1);
+        self.i2c.write(self.address, &buffer)?;
+        buffer = [addresses::CMD_MATRIX_2].to_vec();
+        buffer.extend_from_slice(&self.matrix_2);
+        self.i2c.write(self.address, &buffer)?;
+        self.i2c
+            .write(self.address, &[addresses::CMD_UPDATE, 0x01])?;
         Ok(())
+    }
+
+    pub fn clear(&mut self, matrix: Matrix) {
+        match matrix {
+            Matrix::One => {
+                self.matrix_1 = [0; 8];
+            }
+            Matrix::Two => {
+                self.matrix_2 = [0; 8];
+            }
+        }
     }
 }
 
-enum Matrix {
-    Matrix1,
-    Matrix2,
+pub enum Matrix {
+    One,
+    Two,
 }
 
 pub mod addresses {
@@ -75,8 +84,8 @@ pub mod addresses {
     pub const CMD_BRIGHTNESS: u8 = 0x19;
     pub const CMD_UPDATE: u8 = 0x0C;
     pub const CMD_OPTIONS: u8 = 0x0D;
-    pub const CMD_MATRIX_1: u8 = 0x0D;
-    pub const CMD_MATRIX_2: u8 = 0x0D;
+    pub const CMD_MATRIX_1: u8 = 0x01;
+    pub const CMD_MATRIX_2: u8 = 0x0E;
 
     pub const MODE: u8 = 0b00011000;
     pub const OPTS: u8 = 0b00001110;
