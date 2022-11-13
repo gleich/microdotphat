@@ -72,6 +72,25 @@ where
             }
         }
     }
+
+    pub fn set_decimal(&mut self, matrix: Matrix, on: bool) {
+        match matrix {
+            Matrix::One => {
+                if on {
+                    self.matrix_1[6] |= 0b10000000;
+                } else {
+                    self.matrix_1[6] &= 0b01111111;
+                }
+            }
+            Matrix::Two => {
+                if on {
+                    self.matrix_2[7] |= 0b10000000;
+                } else {
+                    self.matrix_2[7] &= 0b01111111;
+                }
+            }
+        }
+    }
 }
 
 pub enum Matrix {
