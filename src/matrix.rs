@@ -31,7 +31,7 @@ where
         Ok(())
     }
 
-    pub fn set_pixel(&mut self, matrix: Matrix, x: u8, y: u8, on: bool) {
+    pub fn set_pixel(&mut self, matrix: &Matrix, x: u8, y: u8, on: bool) {
         match matrix {
             Matrix::One => {
                 if on {
@@ -62,7 +62,7 @@ where
         Ok(())
     }
 
-    pub fn clear(&mut self, matrix: Matrix) {
+    pub fn clear(&mut self, matrix: Matrix) -> Result<(), Error<I2cError>> {
         match matrix {
             Matrix::One => {
                 self.matrix_1 = [0; 8];
@@ -71,6 +71,8 @@ where
                 self.matrix_2 = [0; 8];
             }
         }
+        self.update()?;
+        Ok(())
     }
 
     pub fn set_decimal(&mut self, matrix: Matrix, on: bool) {

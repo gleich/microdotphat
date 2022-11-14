@@ -5,3 +5,6 @@ edition = "2021"
 
 [dependencies]
 embedded-hal = "0.2.7"
+
+[dev-dependencies]
+rppal = { version = "0.14.0", features = ["hal"] }
