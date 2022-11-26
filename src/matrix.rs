@@ -1,33 +1,47 @@
+use std::marker::PhantomData;
+
+use crate::Error;
+
 use embedded_hal::blocking::i2c::Write;
 
 pub struct NanoMatrix<I2C> {
     pub address: u8,
     pub brightness: u8,
-    pub i2c: I2C,
     pub matrix_1: [u8; 8],
     pub matrix_2: [u8; 8],
+    __phantom: PhantomData<I2C>,
 }
 
-impl<I2C, I2cError> NanoMatrix<I2C>
+impl<'a, I2cError, I2C: Write<Error = I2cError>> NanoMatrix<I2C>
 where
     I2C: Write<Error = I2cError>,
 {
-    pub fn setup(&mut self) -> Result<(), Error<I2cError>> {
-        self.i2c
-            .write(self.address, &[addresses::CMD_MODE, addresses::MODE])?;
-        self.i2c
-            .write(self.address, &[addresses::CMD_OPTIONS, addresses::OPTS])?;
-        self.i2c
-            .write(self.address, &[addresses::CMD_BRIGHTNESS, self.brightness])?;
+    pub fn new(address: u8) -> NanoMatrix<I2C> {
+        Self {
+            address,
+            brightness: 127,
+            matrix_1: [0; 8],
+            matrix_2: [0; 8],
+            __phantom: PhantomData,
+        }
+    }
+
+    pub fn setup(&mut self, i2c: &'a mut I2C) -> Result<(), Error<I2cError>> {
+        i2c.write(self.address, &[addresses::CMD_MODE, addresses::MODE])?;
+        i2c.write(self.address, &[addresses::CMD_OPTIONS, addresses::OPTS])?;
+        i2c.write(self.address, &[addresses::CMD_BRIGHTNESS, self.brightness])?;
         Ok(())
     }
 
-    pub fn set_brightness(&mut self, mut brightness: u8) -> Result<(), Error<I2cError>> {
+    pub fn set_brightness(
+        &mut self,
+        i2c: &'a mut I2C,
+        mut brightness: u8,
+    ) -> Result<(), Error<I2cError>> {
         if brightness > 127 {
             brightness = 127;
         }
-        self.i2c
-            .write(self.address, &[addresses::CMD_BRIGHTNESS, brightness])?;
+        i2c.write(self.address, &[addresses::CMD_BRIGHTNESS, brightness])?;
         Ok(())
     }
 
@@ -50,19 +64,18 @@ where
         }
     }
 
-    pub fn update(&mut self) -> Result<(), Error<I2cError>> {
+    pub fn update(&mut self, i2c: &'a mut I2C) -> Result<(), Error<I2cError>> {
         let mut buffer = [addresses::CMD_MATRIX_1].to_vec();
         buffer.extend_from_slice(&self.matrix_1);
-        self.i2c.write(self.address, &buffer)?;
+        i2c.write(self.address, &buffer)?;
         buffer = [addresses::CMD_MATRIX_2].to_vec();
         buffer.extend_from_slice(&self.matrix_2);
-        self.i2c.write(self.address, &buffer)?;
-        self.i2c
-            .write(self.address, &[addresses::CMD_UPDATE, 0x01])?;
+        i2c.write(self.address, &buffer)?;
+        i2c.write(self.address, &[addresses::CMD_UPDATE, 0x01])?;
         Ok(())
     }
 
-    pub fn clear(&mut self, matrix: Matrix) -> Result<(), Error<I2cError>> {
+    pub fn clear(&mut self, i2c: &'a mut I2C, matrix: Matrix) -> Result<(), Error<I2cError>> {
         match matrix {
             Matrix::One => {
                 self.matrix_1 = [0; 8];
@@ -71,7 +84,7 @@ where
                 self.matrix_2 = [0; 8];
             }
         }
-        self.update()?;
+        self.update(i2c)?;
         Ok(())
     }
 
@@ -110,15 +123,4 @@ pub mod addresses {
 
     pub const MODE: u8 = 0b00011000;
     pub const OPTS: u8 = 0b00001110;
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum Error<I2cError> {
-    I2cError(I2cError),
-}
-
-impl<E> From<E> for Error<E> {
-    fn from(error: E) -> Self {
-        Error::I2cError(error)
-    }
 }
