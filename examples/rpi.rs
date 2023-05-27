@@ -16,9 +16,11 @@ fn main() {
     matrix.setup().expect("Failed to setup matrix");
     loop {
         matrix.update().expect("Failed to update display");
+        matrix.set_pixel(&Matrix::One, 0, 0, true);
         sleep(Duration::from_secs(1));
         matrix.update().expect("Failed to update display");
         sleep(Duration::from_secs(1));
+        matrix.set_pixel(&Matrix::One, 0, 0, false);
     }
     println!("Done");
 }
