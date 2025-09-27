@@ -1,6 +1,8 @@
 [package]
 name = "microdotphat"
+description = "Driver for the MicrodotPHAT"
 version = "0.1.0"
+license = "MIT"
 edition = "2021"
 
 [dependencies]
