@@ -73,6 +73,26 @@ where
         Ok(())
     }
 
+    pub fn set_decimal(&mut self, matrix: Matrix, on: bool) -> Result<(), Error<I2cError>> {
+        match matrix {
+            Matrix::One => {
+                if on {
+                    self.matrix_1[6] |= 0b10000000;
+                } else {
+                    self.matrix_1[6] |= 0b01111111;
+                }
+            }
+            Matrix::Two => {
+                if on {
+                    self.matrix_2[6] |= 0b10000000;
+                } else {
+                    self.matrix_2[6] |= 0b01111111;
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub fn update(&mut self) -> Result<(), Error<I2cError>> {
         let mut frame1 = [0u8; 9];
         frame1[0] = commands::CMD_MATRIX_1;
