@@ -6,21 +6,16 @@ pub enum Matrix {
     Two,
 }
 
-pub struct NanoMatrix<I2C> {
-    i2c: I2C,
+pub struct NanoMatrix {
     address: u8,
     brightness: u8,
     matrix_1: [u8; 8],
     matrix_2: [u8; 8],
 }
 
-impl<I2C, I2cError> NanoMatrix<I2C>
-where
-    I2C: I2c<Error = I2cError>,
-{
-    pub fn new(address: u8, i2c: I2C) -> Self {
+impl NanoMatrix {
+    pub fn new(address: u8) -> Self {
         NanoMatrix {
-            i2c,
             address,
             brightness: 127,
             matrix_1: [0; 8],
@@ -28,13 +23,13 @@ where
         }
     }
 
-    pub fn setup(&mut self) -> Result<(), Error<I2cError>> {
-        self.i2c
-            .write(self.address, &[commands::CMD_MODE, commands::MODE])?;
-        self.i2c
-            .write(self.address, &[commands::CMD_OPTIONS, commands::OPTS])?;
-        self.i2c
-            .write(self.address, &[commands::CMD_BRIGHTNESS, self.brightness])?;
+    pub fn setup<I2C, E>(&self, i2c: &mut I2C) -> Result<(), Error<E>>
+    where
+        I2C: I2c<Error = E>,
+    {
+        i2c.write(self.address, &[commands::CMD_MODE, commands::MODE])?;
+        i2c.write(self.address, &[commands::CMD_OPTIONS, commands::OPTS])?;
+        i2c.write(self.address, &[commands::CMD_BRIGHTNESS, self.brightness])?;
         Ok(())
     }
 
@@ -57,23 +52,28 @@ where
         }
     }
 
-    pub fn clear(&mut self, matrix: Matrix) -> Result<(), Error<I2cError>> {
+    pub fn clear<I2C, E>(&mut self, i2c: &mut I2C, matrix: Matrix) -> Result<(), Error<E>>
+    where
+        I2C: I2c<Error = E>,
+    {
         match matrix {
             Matrix::One => self.matrix_1 = [0; 8],
             Matrix::Two => self.matrix_2 = [0; 8],
         }
-        self.update()?;
+        self.update(i2c)?;
         Ok(())
     }
 
-    pub fn set_brightness(&mut self, brightness: f32) -> Result<(), Error<I2cError>> {
+    pub fn set_brightness<I2C, E>(&mut self, i2c: &mut I2C, brightness: f32) -> Result<(), Error<E>>
+    where
+        I2C: I2c<Error = E>,
+    {
         self.brightness = (brightness * 127.0).clamp(0.0, 127.0) as u8;
-        self.i2c
-            .write(self.address, &[commands::CMD_BRIGHTNESS, self.brightness])?;
+        i2c.write(self.address, &[commands::CMD_BRIGHTNESS, self.brightness])?;
         Ok(())
     }
 
-    pub fn set_decimal(&mut self, matrix: Matrix, on: bool) -> Result<(), Error<I2cError>> {
+    pub fn set_decimal(&mut self, matrix: Matrix, on: bool) {
         match matrix {
             Matrix::One => {
                 if on {
@@ -90,22 +90,23 @@ where
                 }
             }
         }
-        Ok(())
     }
 
-    pub fn update(&mut self) -> Result<(), Error<I2cError>> {
+    pub fn update<I2C, E>(&mut self, i2c: &mut I2C) -> Result<(), Error<E>>
+    where
+        I2C: I2c<Error = E>,
+    {
         let mut frame1 = [0u8; 9];
         frame1[0] = commands::CMD_MATRIX_1;
         frame1[1..].copy_from_slice(&self.matrix_1);
-        self.i2c.write(self.address, &frame1)?;
+        i2c.write(self.address, &frame1)?;
 
         let mut frame2 = [0u8; 9];
         frame2[0] = commands::CMD_MATRIX_2;
         frame2[1..].copy_from_slice(&self.matrix_2);
-        self.i2c.write(self.address, &frame2)?;
+        i2c.write(self.address, &frame2)?;
 
-        self.i2c
-            .write(self.address, &[commands::CMD_UPDATE, 0x01])?;
+        i2c.write(self.address, &[commands::CMD_UPDATE, 0x01])?;
         Ok(())
     }
 }
