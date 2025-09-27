@@ -66,6 +66,13 @@ where
         Ok(())
     }
 
+    pub fn set_brightness(&mut self, brightness: f32) -> Result<(), Error<I2cError>> {
+        self.brightness = (brightness * 127.0).clamp(0.0, 127.0) as u8;
+        self.i2c
+            .write(self.address, &[commands::CMD_BRIGHTNESS, self.brightness])?;
+        Ok(())
+    }
+
     pub fn update(&mut self) -> Result<(), Error<I2cError>> {
         let mut frame1 = [0u8; 9];
         frame1[0] = commands::CMD_MATRIX_1;

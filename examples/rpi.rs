@@ -9,6 +9,11 @@ fn main() {
     let mut microdot = NanoMatrix::new(0x61, i2c);
     microdot.set_pixel(Matrix::One, 0, 0, true);
     microdot.update().expect("failed to update");
-    sleep(Duration::from_secs(10));
+    sleep(Duration::from_secs(5));
+    println!("Set brightness to 0.1");
+    microdot
+        .set_brightness(0.1)
+        .expect("failed to set brightness");
+    sleep(Duration::from_secs(5));
     microdot.clear(Matrix::One).expect("failed to clear");
 }
