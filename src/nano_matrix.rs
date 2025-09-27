@@ -2,8 +2,8 @@ use crate::Error;
 use embedded_hal::i2c::I2c;
 
 pub enum Matrix {
-    MatrixOne,
-    MatrixTwo,
+    One,
+    Two,
 }
 
 pub struct NanoMatrix<I2C> {
@@ -40,14 +40,14 @@ where
 
     pub fn set_pixel(&mut self, matrix: Matrix, x: usize, y: usize, on: bool) {
         match matrix {
-            Matrix::MatrixOne => {
+            Matrix::One => {
                 if on {
                     self.matrix_1[y] |= 0b1 << x;
                 } else {
                     self.matrix_1[y] &= !(0b1 << x);
                 }
             }
-            Matrix::MatrixTwo => {
+            Matrix::Two => {
                 if on {
                     self.matrix_2[y] |= 0b1 << x;
                 } else {
@@ -55,6 +55,15 @@ where
                 }
             }
         }
+    }
+
+    pub fn clear(&mut self, matrix: Matrix) -> Result<(), Error<I2cError>> {
+        match matrix {
+            Matrix::One => self.matrix_1 = [0; 8],
+            Matrix::Two => self.matrix_2 = [0; 8],
+        }
+        self.update()?;
+        Ok(())
     }
 
     pub fn update(&mut self) -> Result<(), Error<I2cError>> {
