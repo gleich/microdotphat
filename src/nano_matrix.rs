@@ -33,7 +33,7 @@ impl NanoMatrix {
         Ok(())
     }
 
-    pub fn set_pixel(&mut self, matrix: Matrix, x: usize, y: usize, on: bool) {
+    pub fn set_pixel(&mut self, matrix: &Matrix, x: usize, y: usize, on: bool) {
         match matrix {
             Matrix::One => {
                 if on {
@@ -44,22 +44,20 @@ impl NanoMatrix {
             }
             Matrix::Two => {
                 if on {
-                    self.matrix_2[y] |= 0b1 << x;
+                    self.matrix_2[x] |= 0b1 << y;
                 } else {
-                    self.matrix_2[y] &= !(0b1 << x);
+                    self.matrix_2[x] &= !(0b1 << y);
                 }
             }
         }
     }
 
-    pub fn clear<I2C, E>(&mut self, i2c: &mut I2C, matrix: Matrix) -> Result<(), Error<E>>
+    pub fn clear<I2C, E>(&mut self, i2c: &mut I2C) -> Result<(), Error<E>>
     where
         I2C: I2c<Error = E>,
     {
-        match matrix {
-            Matrix::One => self.matrix_1 = [0; 8],
-            Matrix::Two => self.matrix_2 = [0; 8],
-        }
+        self.matrix_1 = [0; 8];
+        self.matrix_2 = [0; 8];
         self.update(i2c)?;
         Ok(())
     }
@@ -73,17 +71,17 @@ impl NanoMatrix {
         Ok(())
     }
 
-    pub fn set_decimal(&mut self, matrix: Matrix, on: bool) {
+    pub fn set_decimal(&mut self, matrix: Matrix, value: u8) {
         match matrix {
             Matrix::One => {
-                if on {
+                if value == 1 {
                     self.matrix_1[6] |= 0b10000000;
                 } else {
                     self.matrix_1[6] |= 0b01111111;
                 }
             }
             Matrix::Two => {
-                if on {
+                if value == 1 {
                     self.matrix_2[6] |= 0b10000000;
                 } else {
                     self.matrix_2[6] |= 0b01111111;

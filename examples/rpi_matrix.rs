@@ -15,7 +15,5 @@ fn main() {
         .set_brightness(&mut i2c, 0.1)
         .expect("failed to set brightness");
     sleep(Duration::from_secs(5));
-    matrix
-        .clear(&mut i2c, Matrix::One)
-        .expect("failed to clear");
+    matrix.clear(&mut i2c).expect("failed to clear");
 }
