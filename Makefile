@@ -2,4 +2,4 @@
 
 
 sync:
-	rsync -avh --delete --progress --exclude 'target' . matt@gleichpi.local:~/microdotphat/
+	rsync -avh --delete --progress --exclude 'target' --exclude '.git' . matt@gleichpi.local:~/microdotphat/
