@@ -1,5 +1,5 @@
 use crate::Error;
-use embedded_hal_async::i2c::I2c;
+use embedded_hal::i2c::I2c;
 
 pub enum Matrix {
     MatrixOne,
@@ -28,26 +28,17 @@ where
         }
     }
 
-    pub async fn setup(&mut self) -> Result<(), Error<I2cError>> {
+    pub fn setup(&mut self) -> Result<(), Error<I2cError>> {
         self.i2c
-            .write(self.address, &[commands::CMD_MODE, commands::MODE])
-            .await?;
+            .write(self.address, &[commands::CMD_MODE, commands::MODE])?;
         self.i2c
-            .write(self.address, &[commands::CMD_OPTIONS, commands::OPTS])
-            .await?;
+            .write(self.address, &[commands::CMD_OPTIONS, commands::OPTS])?;
         self.i2c
-            .write(self.address, &[commands::CMD_BRIGHTNESS, self.brightness])
-            .await?;
+            .write(self.address, &[commands::CMD_BRIGHTNESS, self.brightness])?;
         Ok(())
     }
 
-    pub async fn set_pixel(
-        &mut self,
-        matrix: Matrix,
-        x: usize,
-        y: usize,
-        on: bool,
-    ) -> Result<(), Error<I2cError>> {
+    pub fn set_pixel(&mut self, matrix: Matrix, x: usize, y: usize, on: bool) {
         match matrix {
             Matrix::MatrixOne => {
                 if on {
@@ -55,7 +46,6 @@ where
                 } else {
                     self.matrix_1[y] &= !(0b1 << x);
                 }
-                Ok(())
             }
             Matrix::MatrixTwo => {
                 if on {
@@ -63,25 +53,23 @@ where
                 } else {
                     self.matrix_2[y] &= !(0b1 << x);
                 }
-                Ok(())
             }
         }
     }
 
-    pub async fn update(&mut self) -> Result<(), Error<I2cError>> {
+    pub fn update(&mut self) -> Result<(), Error<I2cError>> {
         let mut frame1 = [0u8; 9];
         frame1[0] = commands::CMD_MATRIX_1;
         frame1[1..].copy_from_slice(&self.matrix_1);
-        self.i2c.write(self.address, &frame1).await?;
+        self.i2c.write(self.address, &frame1)?;
 
         let mut frame2 = [0u8; 9];
         frame2[0] = commands::CMD_MATRIX_2;
         frame2[1..].copy_from_slice(&self.matrix_2);
-        self.i2c.write(self.address, &frame2).await?;
+        self.i2c.write(self.address, &frame2)?;
 
         self.i2c
-            .write(self.address, &[commands::CMD_UPDATE])
-            .await?;
+            .write(self.address, &[commands::CMD_UPDATE, 0x01])?;
         Ok(())
     }
 }
