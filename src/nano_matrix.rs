@@ -71,17 +71,17 @@ impl NanoMatrix {
         Ok(())
     }
 
-    pub fn set_decimal(&mut self, matrix: Matrix, value: u8) {
+    pub fn set_decimal(&mut self, matrix: Matrix, on: bool) {
         match matrix {
             Matrix::One => {
-                if value == 1 {
+                if on {
                     self.matrix_1[6] |= 0b10000000;
                 } else {
                     self.matrix_1[6] |= 0b01111111;
                 }
             }
             Matrix::Two => {
-                if value == 1 {
+                if on {
                     self.matrix_2[6] |= 0b10000000;
                 } else {
                     self.matrix_2[6] |= 0b01111111;
