@@ -123,6 +123,8 @@ impl MicrodotPHAT {
     }
 
     pub fn write_string(&mut self, s: &str, offset_x: usize, offset_y: usize) -> usize {
+        self.buffer = [[0; HEIGHT]; WIDTH];
+
         let mut x = offset_x;
         let space_width = 2;
 
