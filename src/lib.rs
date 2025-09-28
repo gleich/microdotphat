@@ -122,6 +122,16 @@ impl MicrodotPHAT {
         }
     }
 
+    pub fn set_brightness<I2C, E>(&mut self, i2c: &mut I2C, brightness: f32) -> Result<(), Error<E>>
+    where
+        I2C: I2c<Error = E>,
+    {
+        for matrix in &mut self.matrices {
+            matrix.set_brightness(i2c, brightness)?;
+        }
+        Ok(())
+    }
+
     pub fn write_string(&mut self, s: &str) -> usize {
         self.buffer = [[0; HEIGHT]; WIDTH];
 
