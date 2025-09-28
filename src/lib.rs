@@ -122,16 +122,16 @@ impl MicrodotPHAT {
         }
     }
 
-    pub fn write_string(&mut self, s: &str, offset_x: usize, offset_y: usize) -> usize {
+    pub fn write_string(&mut self, s: &str) -> usize {
         self.buffer = [[0; HEIGHT]; WIDTH];
 
-        let mut x = offset_x;
+        let mut x = 0;
         let space_width = 2;
 
         for ch in s.chars() {
             if ch == ' ' {
                 for _ in 0..space_width {
-                    self.put_column(x, offset_y, 0x00);
+                    self.put_column(x, 0, 0x00);
                     x += 1;
                 }
                 continue;
@@ -142,19 +142,19 @@ impl MicrodotPHAT {
 
                 if end != usize::MAX {
                     for i in start..=end {
-                        self.put_column(x, offset_y, cols[i]);
+                        self.put_column(x, 0, cols[i]);
                         x += 1;
                     }
                 }
             } else {
                 for _ in 0..space_width {
-                    self.put_column(x, offset_y, 0x00);
+                    self.put_column(x, 0, 0x00);
                     x += 1;
                 }
             }
         }
 
-        x.saturating_sub(offset_x)
+        x.saturating_sub(0)
     }
 }
 
