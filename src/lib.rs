@@ -9,9 +9,9 @@ pub const WIDTH: usize = 30;
 pub const HEIGHT: usize = 7;
 
 pub struct MicrodotPHAT {
-    pub buffer: [[u8; HEIGHT]; WIDTH],
-    pub decimals: [u8; 6],
-    pub matrices: [NanoMatrix; 3],
+    buffer: [[u8; HEIGHT]; WIDTH],
+    decimals: [u8; 6],
+    matrices: [NanoMatrix; 3],
 }
 
 impl MicrodotPHAT {
