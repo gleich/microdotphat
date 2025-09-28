@@ -72,19 +72,22 @@ impl NanoMatrix {
     }
 
     pub fn set_decimal(&mut self, matrix: Matrix, on: bool) {
+        const DP_BIT: u8 = 1 << 7;
+        const COL: usize = 6;
+
         match matrix {
             Matrix::One => {
                 if on {
-                    self.matrix_1[6] |= 0b10000000;
+                    self.matrix_1[COL] |= DP_BIT;
                 } else {
-                    self.matrix_1[6] |= 0b01111111;
+                    self.matrix_1[COL] &= !DP_BIT;
                 }
             }
             Matrix::Two => {
                 if on {
-                    self.matrix_2[6] |= 0b10000000;
+                    self.matrix_2[COL] |= DP_BIT;
                 } else {
-                    self.matrix_2[6] |= 0b01111111;
+                    self.matrix_2[COL] &= !DP_BIT;
                 }
             }
         }
