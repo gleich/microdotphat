@@ -9,7 +9,11 @@ fn main() {
 
     display.clear(&mut i2c).expect("failed to clear display");
 
-    let _len = display.write_string("60.0db");
+    display.write_string("60.0db");
+    display.set_decimal(0, true);
+    display.set_decimal(1, true);
+    display.set_decimal(2, true);
+    display.set_decimal(3, true);
 
     display
         .show(&mut i2c, true)

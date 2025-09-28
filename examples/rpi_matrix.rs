@@ -8,12 +8,7 @@ fn main() {
     println!("Loaded I2C bus");
     let mut matrix = NanoMatrix::new(0x61);
     matrix.set_decimal(Matrix::One, true);
-    matrix.update(&mut i2c).expect("failed to update");
+    matrix.set_decimal(Matrix::Two, true);
+    matrix.update(&mut i2c);
     sleep(Duration::from_secs(5));
-    println!("Set brightness to 0.1");
-    matrix
-        .set_brightness(&mut i2c, 0.1)
-        .expect("failed to set brightness");
-    sleep(Duration::from_secs(5));
-    matrix.clear(&mut i2c).expect("failed to clear");
 }
