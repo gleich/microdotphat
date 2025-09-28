@@ -63,14 +63,6 @@ impl MicrodotPHAT {
         for (matrix_index, m) in self.matrices.iter_mut().enumerate() {
             let base = matrix_index * 10;
 
-            let di = matrix_index * 2;
-            if di < self.decimals.len() {
-                m.set_decimal(Matrix::Two, self.decimals[di] != 0);
-            }
-            if di + 1 < self.decimals.len() {
-                m.set_decimal(Matrix::One, self.decimals[di + 1] != 0);
-            }
-
             for half in [Matrix::Two, Matrix::One] {
                 let x0 = base + if matches!(half, Matrix::One) { 5 } else { 0 };
 
@@ -102,6 +94,12 @@ impl MicrodotPHAT {
                     }
                 }
             }
+
+            let di = matrix_index * 2;
+            let on_two = di < self.decimals.len() && self.decimals[di] != 0;
+            let on_one = di + 1 < self.decimals.len() && self.decimals[di + 1] != 0;
+            m.set_decimal(Matrix::Two, on_two);
+            m.set_decimal(Matrix::One, on_one);
 
             m.update(i2c)?;
         }
