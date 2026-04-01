@@ -4,6 +4,7 @@ description = "Driver for the MicrodotPHAT"
 version = "0.2.4"
 license = "MIT"
 edition = "2021"
+repository = "https://github.com/gleich/microdotphat"
 
 [dependencies]
 embedded-hal = "1.0.0"
