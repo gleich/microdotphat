@@ -1,6 +1,7 @@
 use crate::Error;
 use embedded_hal::i2c::I2c;
 
+#[derive(Copy, Clone)]
 pub enum Matrix {
     One,
     Two,
@@ -33,7 +34,7 @@ impl NanoMatrix {
         Ok(())
     }
 
-    pub fn set_pixel(&mut self, matrix: &Matrix, x: usize, y: usize, on: bool) {
+    pub fn set_pixel(&mut self, matrix: Matrix, x: usize, y: usize, on: bool) {
         match matrix {
             Matrix::One => {
                 if on {

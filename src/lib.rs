@@ -67,7 +67,7 @@ impl MicrodotPHAT {
                 let x0 = base + if matches!(half, Matrix::One) { 5 } else { 0 };
 
                 let mut col = [0u8; 5];
-                for lx in 0..5 {
+                for (lx, col_entry) in col.iter_mut().enumerate() {
                     let gx = x0 + lx;
                     if gx >= WIDTH {
                         break;
@@ -84,13 +84,13 @@ impl MicrodotPHAT {
                             bits |= 1 << y;
                         }
                     }
-                    col[lx] = bits;
+                    *col_entry = bits;
                 }
 
-                for lx in 0..5 {
+                for (lx, &bits) in col.iter().enumerate() {
                     for y in 0..HEIGHT {
-                        let on = (col[lx] >> y) & 1 == 1;
-                        m.set_pixel(&half, lx, y, on);
+                        let on = (bits >> y) & 1 == 1;
+                        m.set_pixel(half, lx, y, on);
                     }
                 }
             }
@@ -146,13 +146,9 @@ impl MicrodotPHAT {
             }
 
             if let Some(cols) = font::lookup_glyph(ch) {
-                let (start, end) = { (0usize, 4usize) };
-
-                if end != usize::MAX {
-                    for i in start..=end {
-                        self.put_column(x, 0, cols[i]);
-                        x += 1;
-                    }
+                for col_val in cols {
+                    self.put_column(x, 0, col_val);
+                    x += 1;
                 }
             } else {
                 for _ in 0..space_width {
@@ -162,7 +158,7 @@ impl MicrodotPHAT {
             }
         }
 
-        x.saturating_sub(0)
+        x
     }
 }
 
